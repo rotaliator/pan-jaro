@@ -3,13 +3,10 @@
             [clojure.string :as str]
             [clj-fuzzy.jaro-winkler :refer [jaro jaro-winkler]]))
 
-(def znaki-spec #"[;.,«»()!:?…*]")
-
 (def istotne-słowa (as-> "pan-tadeusz1.txt" $
-                     (slurp $)                     ;; odczyt z pliku
-                     (str/replace $ znaki-spec "")
-                     (str/split $ #"\s+")          ;; dzielę na wyrazy
-                     (filter #(> (count %) 2) $))) ;; tylko dłuższe niż dwa znaki
+                     (slurp $)                                     ;; odczyt z pliku
+                     (str/split $ #"[^A-Za-zżółćęśąźńŻÓŁĆĘŚĄŹŃ]+") ;; dzielę na wyrazy
+                     (filter #(> (count %) 2) $)))                 ;; tylko dłuższe niż dwa znaki
 
 (def wybrane-słowa (repeatedly 30 #(rand-nth istotne-słowa)))
 
