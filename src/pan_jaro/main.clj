@@ -4,7 +4,9 @@
             [clj-fuzzy.jaro-winkler :refer [jaro-winkler]])
   (:import (org.apache.commons.text.similarity JaroWinklerDistance)))
 
-(def jw-distance (JaroWinklerDistance.))
+(set! *warn-on-reflection* true)
+
+(def jw-distance ^JaroWinklerDistance (JaroWinklerDistance.))
 
 
 (def istotne-słowa (as-> "pan-tadeusz1.txt" $
@@ -30,9 +32,9 @@
        (distinct)
        (reverse)))
 
-(defn znajdź-podobne-słowa-java [słowo słownik minimalne-dopasowanie]
+(defn znajdź-podobne-słowa-java [^CharSequence słowo słownik minimalne-dopasowanie]
   (->> słownik
-       (pmap (fn [s] [s (.apply jw-distance słowo s)]))
+       (map (fn [s] [s (.apply ^JaroWinklerDistance jw-distance ^String słowo ^String s)]))
        (filter #(> (second %) minimalne-dopasowanie))
        (sort-by second)
        (distinct)
