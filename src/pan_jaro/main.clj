@@ -1,7 +1,11 @@
 (ns pan-jaro.main
   (:require [clojure.string :as str]
             [clojure.pprint :refer [pprint]]
-            [clj-fuzzy.jaro-winkler :refer [jaro-winkler]]))
+            [clj-fuzzy.jaro-winkler :refer [jaro-winkler]])
+  (:import (org.apache.commons.text.similarity JaroWinklerDistance)))
+
+(def jw-distance (JaroWinklerDistance.))
+
 
 (def istotne-słowa (as-> "pan-tadeusz1.txt" $
                      (slurp $)                                     ;; odczyt z pliku
@@ -26,6 +30,14 @@
        (distinct)
        (reverse)))
 
+(defn znajdź-podobne-słowa-java [słowo słownik minimalne-dopasowanie]
+  (->> słownik
+       (pmap (fn [s] [s (.apply jw-distance słowo s)]))
+       (filter #(> (second %) minimalne-dopasowanie))
+       (sort-by second)
+       (distinct)
+       (reverse)))
+
 (defn znajdź-podobne-słowa-xf
   "To samo co powyżej tylko z użyciem transducera"
   [słowo słownik minimalne-dopasowanie]
@@ -40,7 +52,7 @@
 
 (defn zapisz-dopasowania-słów [słowa słownik minimalne-dopasowanie plik]
   (doseq [słowo słowa]
-    (let [dopasowania (znajdź-podobne-słowa słowo słownik minimalne-dopasowanie)]
+    (let [dopasowania (znajdź-podobne-słowa-java słowo słownik minimalne-dopasowanie)]
       (spit plik (str słowo ":\n") :append true)
       (spit plik (with-out-str (pprint dopasowania)) :append true))))
 
@@ -58,6 +70,7 @@
   ;;     ["mów" 0.8500000000000001])
   (time (znajdź-podobne-słowa "mrówki" istotne-słowa 0.85))
   (time (znajdź-podobne-słowa-xf "mrówki" istotne-słowa 0.85))
+  (time (znajdź-podobne-słowa-java "mrówki" istotne-słowa 0.85))
 
   (time (zapisz-dopasowania-słów zmodyfikowane-słowa istotne-słowa 0.85 "dopasowania.txt"))
 
