@@ -40,7 +40,7 @@
 
 (defn zapisz-dopasowania-słów [słowa słownik minimalne-dopasowanie plik]
   (doseq [słowo słowa]
-    (let [dopasowania (znajdź-podobne-słowa-xf słowo słownik minimalne-dopasowanie)]
+    (let [dopasowania (znajdź-podobne-słowa słowo słownik minimalne-dopasowanie)]
       (spit plik (str słowo ":\n") :append true)
       (spit plik (with-out-str (pprint dopasowania)) :append true))))
 
