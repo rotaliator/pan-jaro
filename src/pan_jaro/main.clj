@@ -20,7 +20,7 @@
 
 (defn znajdź-podobne-słowa [słowo słownik minimalne-dopasowanie]
   (->> słownik
-       (map (fn [s] [s (jaro-winkler słowo s)]))
+       (pmap (fn [s] [s (jaro-winkler słowo s)]))
        (filter #(> (second %) minimalne-dopasowanie))
        (sort-by second)
        (distinct)
